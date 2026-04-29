@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warrior AI Developer</title>
+    <style>
+        :root {
+            --bg-primary: #0e0e14;
+            --bg-card: #16161f;
+            --bg-card-alt: #1c1c28;
+            --gold: #d4a832;
+            --gold-light: #f0d060;
+            --gold-dim: rgba(212, 168, 50, 0.14);
+            --green: #4aaa7e;
+            --green-dim: rgba(74, 170, 126, 0.14);
+            --text-primary: #f0f0f4;
+            --text-secondary: #b0b0c8;
+            --text-muted: #70708a;
+            --border: #28283a;
+            --border-gold: rgba(212, 168, 50, 0.45);
+            --border-green: rgba(74, 170, 126, 0.45);
+            --glow-gold: 0 0 32px rgba(212, 168, 50, 0.18);
+            --glow-green: 0 0 32px rgba(74, 170, 126, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ─── HEADER ─────────────────────────────────────────── */
+        .header {
+            position: relative;
+            padding: 48px 56px 36px;
+            background: linear-gradient(180deg, #0d0d18 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, var(--gold) 40%, var(--gold-light) 60%, transparent 100%);
+        }
+        .header::after {
+            content: 'WARRIOR';
+            position: absolute;
+            right: -20px; top: -10px;
+            font-size: 160px;
+            font-weight: 900;
+            color: rgba(212, 168, 50, 0.04);
+            letter-spacing: -4px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .rank-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border-gold);
+            border-radius: 4px;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        .rank-chip::before { content: '▲'; font-size: 10px; }
+
+        h1 {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+        h1 .ai { color: var(--gold); }
+        h1 .dev { color: var(--text-secondary); font-weight: 300; }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 17px;
+            margin-bottom: 32px;
+            max-width: 560px;
+            line-height: 1.6;
+        }
+
+        .overall-progress {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 600px;
+        }
+        .prog-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .prog-track {
+            flex: 1;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .prog-fill {
+            height: 100%;
+            width: 3%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 3px;
+        }
+        .prog-pct {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+
+        /* ─── STATS BAR ──────────────────────────────────────── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--border);
+        }
+        .stat {
+            padding: 26px 36px;
+            border-right: 1px solid var(--border);
+        }
+        .stat:last-child { border-right: none; }
+        .stat-label {
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .stat-val {
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-sub { font-size: 14px; color: var(--text-secondary); }
+        .gold { color: var(--gold); }
+        .green { color: var(--green); }
+        .white { color: var(--text-primary); }
+
+        /* ─── CONTENT AREA ───────────────────────────────────── */
+        .content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 48px 56px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ─── PHASES GRID ────────────────────────────────────── */
+        .phases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 56px;
+        }
+
+        .phase-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 28px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .phase-card::before {
+            content: attr(data-num);
+            position: absolute;
+            right: 16px;
+            top: 12px;
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.03);
+            line-height: 1;
+            pointer-events: none;
+        }
+        .phase-card.active {
+            border-color: var(--border-gold);
+            box-shadow: var(--glow-gold);
+        }
+        .phase-card.locked { opacity: 0.5; }
+        .phase-card.done { border-color: var(--border-green); }
+
+        .phase-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+        .phase-num {
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .badge {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+        .badge-active {
+            background: var(--gold-dim);
+            color: var(--gold);
+            border: 1px solid var(--border-gold);
+        }
+        .badge-locked {
+            background: rgba(66,66,90,0.25);
+            color: var(--text-muted);
+            border: 1px solid rgba(80,80,100,0.4);
+        }
+        .badge-done {
+            background: var(--green-dim);
+            color: var(--green);
+            border: 1px solid var(--border-green);
+        }
+
+        .phase-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .phase-dur {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+
+        .topic-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        .topic-list li {
+            font-size: 15px;
+            color: var(--text-secondary);
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.4;
+        }
+        .topic-list li::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .phase-card.active .topic-list li:first-child { color: var(--text-primary); }
+        .phase-card.active .topic-list li:first-child::before { background: var(--gold); }
+
+        .project-box {
+            border-radius: 6px;
+            padding: 13px 16px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+        }
+        .project-box-label {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+        .phase-card.active .project-box { background: var(--gold-dim); border-color: var(--border-gold); }
+        .phase-card.active .project-box-label { color: var(--gold); }
+        .phase-card.done .project-box { background: var(--green-dim); border-color: var(--border-green); }
+        .phase-card.done .project-box-label { color: var(--green); }
+
+        .project-name { font-size: 15px; color: var(--text-primary); }
+
+        .phase-prog {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .phase-prog-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .phase-prog-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+        .fill-gold { background: var(--gold); }
+        .fill-green { background: var(--green); }
+        .fill-muted { background: var(--text-muted); width: 0% !important; }
+
+        /* ─── RANK TRACK ─────────────────────────────────────── */
+        .rank-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 56px;
+            position: relative;
+            padding: 8px 0 4px;
+        }
+
+        .rank-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .rank-connector {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+        .rank-item:last-child .rank-connector { display: none; }
+        .rank-item.active .rank-connector {
+            background: linear-gradient(90deg, var(--gold), var(--border));
+        }
+        .rank-item.done .rank-connector { background: var(--green); }
+
+        .rank-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border: 2px solid var(--border);
+            background: var(--bg-card);
+            position: relative;
+            z-index: 1;
+        }
+        .rank-item.active .rank-icon {
+            border-color: var(--gold);
+            background: var(--gold-dim);
+            box-shadow: 0 0 16px rgba(212,168,50,0.45);
+        }
+        .rank-item.done .rank-icon {
+            border-color: var(--green);
+            background: var(--green-dim);
+        }
+        .rank-item.locked .rank-icon { opacity: 0.4; }
+
+        .rank-name {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .rank-item.active .rank-name { color: var(--gold); }
+        .rank-item.done .rank-name { color: var(--green); }
+        .rank-trigger {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        /* ─── CURRENT MISSION ────────────────────────────────── */
+        .mission-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 34px;
+            box-shadow: var(--glow-gold);
+            margin-bottom: 56px;
+        }
+        .mission-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 26px;
+        }
+        .mission-eyebrow {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        .mission-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .mission-subtitle { font-size: 15px; color: var(--text-secondary); margin-top: 5px; line-height: 1.5; }
+
+        .week-badge {
+            background: var(--gold-dim);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 10px 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .week-num { font-size: 30px; font-weight: 800; color: var(--gold); line-height: 1; }
+        .week-label { font-size: 11px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+        .mission-tasks { list-style: none; }
+        .task-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .task-item:last-child { border-bottom: none; }
+        .task-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border-gold);
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .task-body strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .task-body span {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* ─── TECH STACK ─────────────────────────────────────── */
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 56px;
+        }
+        .stack-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 22px;
+        }
+        .stack-icon { font-size: 26px; margin-bottom: 12px; }
+        .stack-name {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .stack-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+        .stack-card.active { border-color: var(--border-gold); }
+        .stack-card.locked { opacity: 0.4; }
+
+        /* ─── FOOTER ─────────────────────────────────────────── */
+        .footer {
+            text-align: center;
+            padding: 28px;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 900px) {
+            .header, .content { padding: 28px 24px; }
+            .phases-grid { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .stack-grid { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ HEADER -->
+<div class="header">
+    <div class="rank-chip">Recruit &mdash; Week 1 of 30</div>
+    <h1>WARRIOR <span class="ai">AI</span> <span class="dev">DEVELOPER</span></h1>
+    <p class="tagline">30 weeks. 4 phases. One shipped app. From JavaScript foundations to a real AI product people will pay for.</p>
+    <div class="overall-progress">
+        <span class="prog-label">Campaign Progress</span>
+        <div class="prog-track"><div class="prog-fill"></div></div>
+        <span class="prog-pct">3% &mdash; Week 1 / 30</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ STATS -->
+<div class="stats-bar">
+    <div class="stat">
+        <div class="stat-label">Current Phase</div>
+        <div class="stat-val gold">1</div>
+        <div class="stat-sub">Foundations</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Current Week</div>
+        <div class="stat-val white">1 <span style="font-size:16px;color:var(--text-muted)">/ 30</span></div>
+        <div class="stat-sub">Started April 28, 2026</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Hours Logged</div>
+        <div class="stat-val white">0 <span style="font-size:16px;color:var(--text-muted)">/ 120</span></div>
+        <div class="stat-sub">~4 hrs / week goal</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Current Rank</div>
+        <div class="stat-val gold">&#9670; RECRUIT</div>
+        <div class="stat-sub">Next: Private (Week 6)</div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ CONTENT -->
+<div class="content">
+
+    <!-- CURRENT MISSION -->
+    <div class="section-label">Current Mission</div>
+    <div class="mission-card">
+        <div class="mission-header">
+            <div>
+                <div class="mission-eyebrow">&#9670; Phase 1 &mdash; Active</div>
+                <div class="mission-title">JavaScript Foundations</div>
+                <div class="mission-subtitle">Get comfortable writing and reading JavaScript — the language the web runs on.</div>
+            </div>
+            <div class="week-badge">
+                <div class="week-num">1</div>
+                <div class="week-label">Week</div>
+            </div>
+        </div>
+        <ul class="mission-tasks">
+            <li class="task-item">
+                <div class="task-num">1</div>
+                <div class="task-body">
+                    <strong>Set up your dev environment</strong>
+                    <span>Make sure VS Code is installed and you know how to open a folder and run a file with Live Server.</span>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-num">2</div>
+                <div class="task-body">
+                    <strong>JavaScript: Variables, types, and functions</strong>
+                    <span>Learn <code style="color:var(--gold);background:var(--gold-dim);padding:1px 5px;border-radius:3px">let</code>, <code style="color:var(--gold);background:var(--gold-dim);padding:1px 5px;border-radius:3px">const</code>, strings, numbers, booleans. Write your first 3 functions.</span>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-num">3</div>
+                <div class="task-body">
+                    <strong>DOM manipulation basics</strong>
+                    <span>Use JavaScript to make something happen in a webpage — change text, show/hide elements, react to a button click.</span>
+                </div>
+            </li>
+            <li class="task-item">
+                <div class="task-num">4</div>
+                <div class="task-body">
+                    <strong>Update this dashboard</strong>
+                    <span>Your first hands-on build: add a JavaScript "hours logged" counter to this page that remembers your input between sessions. We'll build this together.</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- PHASES -->
+    <div class="section-label">Campaign Phases</div>
+    <div class="phases-grid">
+
+        <div class="phase-card active" data-num="1">
+            <div class="phase-top">
+                <span class="phase-num">Phase 01</span>
+                <span class="badge badge-active">&#9670; Active</span>
+            </div>
+            <div class="phase-title">Foundations</div>
+            <div class="phase-dur">Weeks 1&ndash;6 &nbsp;&middot;&nbsp; ~24 hours</div>
+            <ul class="topic-list">
+                <li>JavaScript essentials (variables, functions, DOM, events)</li>
+                <li>AI API deep dive &mdash; system prompts, temperature, context</li>
+                <li>The fetch API &mdash; talking to external services from code</li>
+                <li>How to read and debug code you didn&rsquo;t write</li>
+            </ul>
+            <div class="project-box">
+                <div class="project-box-label">&#9670; Mini Project</div>
+                <div class="project-name">AI Chatbot Webpage &mdash; your first solo AI build</div>
+            </div>
+            <div class="phase-prog">
+                <span>Week 1 / 6</span>
+                <span>0%</span>
+            </div>
+            <div class="phase-prog-track"><div class="phase-prog-fill fill-gold" style="width:0%"></div></div>
+        </div>
+
+        <div class="phase-card locked" data-num="2">
+            <div class="phase-top">
+                <span class="phase-num">Phase 02</span>
+                <span class="badge badge-locked">&#9650; Locked</span>
+            </div>
+            <div class="phase-title">Full Stack Basics</div>
+            <div class="phase-dur">Weeks 7&ndash;14 &nbsp;&middot;&nbsp; ~32 hours</div>
+            <ul class="topic-list">
+                <li>React fundamentals &mdash; how modern apps are built</li>
+                <li>Supabase &mdash; auth, database, real-time data</li>
+                <li>Connecting AI + database (store conversations, user profiles)</li>
+                <li>Reading other people&rsquo;s code and pulling from open source</li>
+            </ul>
+            <div class="project-box">
+                <div class="project-box-label">Mini Project</div>
+                <div class="project-name">AI-powered personal tool &mdash; your choice</div>
+            </div>
+            <div class="phase-prog">
+                <span>Unlocks Week 7</span>
+                <span>&mdash;</span>
+            </div>
+            <div class="phase-prog-track"><div class="phase-prog-fill fill-muted" style="width:0%"></div></div>
+        </div>
+
+        <div class="phase-card locked" data-num="3">
+            <div class="phase-top">
+                <span class="phase-num">Phase 03</span>
+                <span class="badge badge-locked">&#9650; Locked</span>
+            </div>
+            <div class="phase-title">The Warrior App</div>
+            <div class="phase-dur">Weeks 15&ndash;26 &nbsp;&middot;&nbsp; ~48 hours</div>
+            <ul class="topic-list">
+                <li>App architecture &amp; user profile system</li>
+                <li>AI workout generation with Claude API</li>
+                <li>Gamification &mdash; XP system, military ranks, unlockables</li>
+                <li>UI &amp; graphics &mdash; muscle diagrams, animations, visual progress</li>
+                <li>Testing, polish, and real-user feedback</li>
+            </ul>
+            <div class="project-box">
+                <div class="project-box-label">Main Deliverable</div>
+                <div class="project-name">Warrior App v1 &mdash; shippable, real product</div>
+            </div>
+            <div class="phase-prog">
+                <span>Unlocks Week 15</span>
+                <span>&mdash;</span>
+            </div>
+            <div class="phase-prog-track"><div class="phase-prog-fill fill-muted" style="width:0%"></div></div>
+        </div>
+
+        <div class="phase-card locked" data-num="4">
+            <div class="phase-top">
+                <span class="phase-num">Phase 04</span>
+                <span class="badge badge-locked">&#9650; Locked</span>
+            </div>
+            <div class="phase-title">Launch &amp; Monetize</div>
+            <div class="phase-dur">Weeks 27&ndash;30 &nbsp;&middot;&nbsp; ~16 hours</div>
+            <ul class="topic-list">
+                <li>Deploy to Vercel &mdash; making it live on the internet</li>
+                <li>Stripe integration &mdash; freemium or subscription model</li>
+                <li>Landing page that converts visitors to users</li>
+                <li>Basic growth &mdash; how people will find it</li>
+            </ul>
+            <div class="project-box">
+                <div class="project-box-label">Main Deliverable</div>
+                <div class="project-name">Live app + first paying customer</div>
+            </div>
+            <div class="phase-prog">
+                <span>Unlocks Week 27</span>
+                <span>&mdash;</span>
+            </div>
+            <div class="phase-prog-track"><div class="phase-prog-fill fill-muted" style="width:0%"></div></div>
+        </div>
+
+    </div>
+
+    <!-- RANK TRACK -->
+    <div class="section-label">Rank Progression</div>
+    <div class="rank-row">
+
+        <div class="rank-item active">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9670;</div>
+            <div class="rank-name">Recruit</div>
+            <div class="rank-trigger">Start</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9651;</div>
+            <div class="rank-name">Private</div>
+            <div class="rank-trigger">Week 6</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9651;&#9651;</div>
+            <div class="rank-name">Corporal</div>
+            <div class="rank-trigger">Week 10</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9733;</div>
+            <div class="rank-name">Sergeant</div>
+            <div class="rank-trigger">Week 14</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9733;&#9733;</div>
+            <div class="rank-name">Lieutenant</div>
+            <div class="rank-trigger">Week 20</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#9733;&#9733;&#9733;</div>
+            <div class="rank-name">Captain</div>
+            <div class="rank-trigger">Week 26</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#11088;</div>
+            <div class="rank-name">Major</div>
+            <div class="rank-trigger">Week 30</div>
+        </div>
+        <div class="rank-item locked">
+            <div class="rank-connector"></div>
+            <div class="rank-icon">&#128081;</div>
+            <div class="rank-name">General</div>
+            <div class="rank-trigger">First $</div>
+        </div>
+
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="section-label">Tech Stack</div>
+    <div class="stack-grid">
+        <div class="stack-card active">
+            <div class="stack-icon">&#128196;</div>
+            <div class="stack-name">JavaScript</div>
+            <div class="stack-desc">The language of the web. Your first unlock.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#9889;</div>
+            <div class="stack-name">React</div>
+            <div class="stack-desc">How modern UIs are built. Phase 2.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#128294;</div>
+            <div class="stack-name">Claude API</div>
+            <div class="stack-desc">The AI brain behind the Warrior App.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#128439;</div>
+            <div class="stack-name">Supabase</div>
+            <div class="stack-desc">Database, auth, real-time. Phase 2.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#9654;</div>
+            <div class="stack-name">Vercel</div>
+            <div class="stack-desc">Deploy &amp; ship your app. Phase 4.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#128179;</div>
+            <div class="stack-name">Stripe</div>
+            <div class="stack-desc">Get paid. Phase 4.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#127918;</div>
+            <div class="stack-name">Gamification</div>
+            <div class="stack-desc">XP, ranks, unlocks. Phase 3.</div>
+        </div>
+        <div class="stack-card locked">
+            <div class="stack-icon">&#127947;</div>
+            <div class="stack-name">Warrior App</div>
+            <div class="stack-desc">The mission. Phase 3.</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    WARRIOR AI DEVELOPER &nbsp;&middot;&nbsp; Started April 28, 2026 &nbsp;&middot;&nbsp; Week 1 of 30 &nbsp;&middot;&nbsp; Recruit
+</div>
+
+</body>
+</html>
