@@ -1,0 +1,74 @@
+:root {
+  --black: #000000;
+  --carbon: #0d0d0d;
+  --grey-dark: #111111;
+  --grey-border: #2a2a2a;
+  --blue: #00a3ff;
+  --blue-dim: rgba(0, 163, 255, 0.15);
+  --blue-glow: rgba(0, 163, 255, 0.4);
+  --gold: #ffb800;
+  --white: #ffffff;
+  --white-dim: rgba(255, 255, 255, 0.55);
+  --white-faint: rgba(255, 255, 255, 0.08);
+  --danger: #ff4444;
+
+  --font-display: 'Black Ops One', 'Segoe UI', sans-serif;
+  --font-body: 'Montserrat', system-ui, sans-serif;
+
+  font: 16px/1.5 var(--font-body);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* subtle HUD grid texture, matches the Monolith dashboard */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 6px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 6px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: var(--font-body);
+}
